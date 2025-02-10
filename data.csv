@@ -1,0 +1,11 @@
+Good,Type,BaseGood1,BaseGood1Quantity,BaseGood2,BaseGood2Quantity,BuyPrice,SellPrice
+Wheat,Base,,,,,,1,2
+Flour,Intermediate,Wheat,5,,,,3,4
+Bread,Product,Flour,3,Water,1,5,6
+Water,Base,,,,,,0.5,1
+Boar,Base,,,,,,2,3
+Meat,Product,Boar,1,,,,4,5
+Lumber,Base,,,,,,1,2
+Plank,Product,Lumber,1,,,,3,4
+Stone,Base,,,,,,1,1.5
+Polished Stone,Product,Stone,3,,,,2,3
