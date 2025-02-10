@@ -38,6 +38,11 @@
       opacity: 0;
       transition: opacity 0.2s;
     }
+
+    .node text {
+      /* Adjust font size as needed */
+      font-size: 10px;
+    }
   </style>
 </head>
 
@@ -48,6 +53,11 @@
   <input type="file" id="csvFileInput" accept=".csv">
   <button onclick="exportCSV()">Export CSV</button>
 
+  <div>
+    <label><input type="radio" name="visualization" value="force" checked> Force Directed</label>
+    <label><input type="radio" name="visualization" value="tree"> Tidy Tree</label>
+  </div>
+
   <div id="chart"></div>
   <div class="tooltip"></div>
 
@@ -55,6 +65,7 @@
     let nodes = [];
     let links = [];
     let graphData; // Store the original parsed data
+    let currentVisualization = "force"; // Default visualization
 
     const svg = d3.select("#chart").append("svg");
     const tooltip = d3.select(".tooltip");
@@ -63,16 +74,12 @@
 
     svg.attr("width", width).attr("height", height);
 
-    const simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(d => d.id).distance(100)) // Adjust distance as needed
-      .force("charge", d3.forceManyBody().strength(-400)) // Adjust strength as needed
-      .force("center", d3.forceCenter(width / 2, height / 2));
-
-    const link = svg.append("g").attr("class", "links")
-      .selectAll("line");
-
-    const node = svg.append("g").attr("class", "nodes")
-      .selectAll("g"); // Group for circle and text
+    // Event listener for radio buttons
+    d3.selectAll('input[name="visualization"]').on('change', function () {
+      currentVisualization = this.value;
+      console.log(currentVisualization)
+      updateVisualization();
+    });
 
     document.getElementById('csvFileInput').addEventListener('change', handleFileSelect);
 
@@ -123,14 +130,34 @@
         }
       });
 
-      console.log(nodes);
-      console.log(links);
-
       updateVisualization();
     }
 
 
     function updateVisualization() {
+      svg.selectAll("*").remove(); // Clear previous visualization
+      console.log(currentVisualization)
+      if (currentVisualization === "force") {
+        drawForceDirected();
+      } else if (currentVisualization === "tree") {
+        drawTidyTree();
+      }
+    }
+
+    function drawForceDirected() {
+
+      const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(100)) // Adjust distance as needed
+        .force("charge", d3.forceManyBody().strength(-400)) // Adjust strength as needed
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+      const link = svg.append("g").attr("class", "links")
+        .selectAll("line")
+        .data(links, d => d.target.id + "-" + d.source.id);
+
+      const node = svg.append("g").attr("class", "nodes")
+        .selectAll("g"); // Group for circle and text
+
       // Update links
       //   links = link.data(links, d => d.target.id + "-" + d.source.id); //Important for correct update
       //   links.exit().remove();
@@ -215,7 +242,7 @@
           .attr("transform", d => {
             d.x = Math.max(10, Math.min(width - 10, d.x)); // Keep within x bounds
             d.y = Math.max(10, Math.min(height - 10, d.y)); // Keep within y bounds
-            console.log(d.id + "(" + d.x + "," + d.y + ")")
+            // console.log(d.id + "(" + d.x + "," + d.y + ")")
             return `translate(${d.x},${d.y})`;
           });
 
@@ -233,6 +260,93 @@
         //   node.y = height / 2 + Math.random() * 200 - 100; // Center with some randomness
         // });
       });
+    }
+
+    function drawTidyTree() {
+      const root = d3.stratify().id(d => d.Good).parentId(d => {
+        if (d.Type !== "Base") {
+          const parents = [];
+          if (d.BaseGood1) parents.push(d.BaseGood1);
+          if (d.BaseGood2) parents.push(d.BaseGood2);
+          return parents.length > 0 ? parents : null; // Return array of parents or null
+        }
+        return null;
+      })(graphData);
+
+      const treeLayout = d3.tree().size([width, height]);
+      const treeData = treeLayout(root);
+
+      const treeNodes = treeData.descendants();
+      const treeLinks = treeData.links();
+
+      // Create a map to efficiently find nodes by ID
+      const nodeMap = new Map(treeNodes.map(node => [node.data.Good, node]));
+
+      // Draw links (now curved)
+      svg.append("g")
+        .attr("fill", "none")
+        .attr("stroke", "#999")
+        .attr("stroke-opacity", 0.6)
+        .selectAll("path")
+        .data(treeLinks)
+        .join("path")
+        .attr("d", d3.linkHorizontal({
+          source: d => d.source.x,
+          target: d => d.target.x
+        }));
+
+      // Draw explicit links for multiple parents
+      svg.append("g")
+        .attr("fill", "none")
+        .attr("stroke", "red") // Highlight explicit links
+        .attr("stroke-opacity", 0.8)
+        .selectAll("path")
+        .data(graphData.filter(d => d.Type !== "Base" && (d.BaseGood2 || d.BaseGood1))) // Filter for multi-parent goods
+        .join("path")
+        .attr("d", d => {
+          const target = nodeMap.get(d.Good);
+          const source1 = d.BaseGood1 ? nodeMap.get(d.BaseGood1) : null;
+          const source2 = d.BaseGood2 ? nodeMap.get(d.BaseGood2) : null;
+
+          // Create curved paths for each parent
+          let pathStr = "";
+          if (source1) {
+            pathStr += d3.linkHorizontal({ source: source1, target: target })();
+          }
+          if (source2) {
+            pathStr += d3.linkHorizontal({ source: source2, target: target })();
+          }
+          return pathStr;
+        });
+
+
+      // Draw nodes
+      const node = svg.append("g")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1.5)
+        .selectAll("g")
+        .data(treeNodes) // Use treeNodes
+        .join("g")
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+
+      node.append("circle")
+        .attr("r", 5)
+        .attr("fill", d => {
+          switch (d.data.Type) {
+            case "Base": return "green";
+            case "Intermediate": return "blue";
+            case "Product": return "red";
+            default: return "gray";
+          }
+        })
+        .on("mouseover", showTooltip)
+        .on("mouseout", hideTooltip);
+
+      node.append("text")
+        .attr("dy", "0.31em")
+        .attr("x", d => d.children ? -8 : 8)
+        .attr("text-anchor", d => d.children ? "end" : "start")
+        .text(d => d.data.id);
     }
 
     function showTooltip(event, d) {
