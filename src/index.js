@@ -223,7 +223,7 @@ function drawForceDirected() {
                 default: return "gray";
             }
         })
-        .on("mouseover", showTooltip)
+        .on("mouseover", showTooltipNode)
         .on("mouseout", hideTooltip);
 
     nodesEnter.append("text")
@@ -348,7 +348,7 @@ function drawTidyTree() {
                 default: return "gray";
             }
         })
-        .on("mouseover", showTooltip)
+        .on("mouseover", showTooltipNode)
         .on("mouseout", hideTooltip);
 
     node.append("text")
@@ -380,20 +380,21 @@ function arrowTransform(d) { // Changed to 'd' to represent data
 function drawD3DAG() {
     const builder = d3dag.graphStratify()
         .id(function (d) { return d.name })
-        // .parentData(function(d) {
-        //     if (d.ingredients) {
-        //         return d.ingredients.map(ingredient => ({ name: ingredient.name, quantity: ingredient.quantity }));
-        //     } else {
-        //         return [];
-        //     }
-        // })
-        .parentIds(function (d) {
+        .parentData(function(d) {
+            console.log(d)
             if (d.ingredients) {
-                return d.ingredients.map(ingredient => ingredient.name)
+                return d.ingredients.map(ingredient => ([ ingredient.name, { quantity: ingredient.quantity }]));
             } else {
-                return []
+                return [];
             }
         });
+        // .parentIds(function (d) {
+        //     if (d.ingredients) {
+        //         return d.ingredients.map(ingredient => ingredient.name)
+        //     } else {
+        //         return []
+        //     }
+        // });
     const graph = builder(yamlData.goods)
 
 
@@ -450,7 +451,7 @@ function drawD3DAG() {
                 .append("g")
                 .attr("transform", ({ x, y }) => `translate(${x}, ${y})`)
                 .attr("opacity", 0)
-                .on("mouseover", showTooltip)
+                .on("mouseover", showTooltipNode)
                 .on("mouseout", hideTooltip)
                 .call((enter) => {
                     enter
@@ -514,6 +515,8 @@ function drawD3DAG() {
                     "stroke",
                     ({ source, target }) => `url(#${source.data.id}--${target.data.id})`
                 )
+                .on("mouseover", showTooltipLink)
+                .on("mouseout", hideTooltip)
                 .attr("opacity", 0)
                 .call((enter) => enter.transition(trans).attr("opacity", 1))
         );
@@ -584,10 +587,18 @@ function drawD3DAG() {
     //     .text(d => d.data.Good);
 }
 
-function showTooltip(event, d) {
+function showTooltipNode(event, d) {
     // console.log(d);
     tooltip.transition().duration(200).style("opacity", .9);
     tooltip.html(`<b>${d.data.name}</b><br>Type: ${d.data.type}<br>Buy Price: ${d.data.buyPrice}<br>Sell Price: ${d.data.sellPrice}`)
+        .style("left", (event.pageX + 10) + "px") // Adjust offset as needed
+        .style("top", (event.pageY - 28) + "px"); // Adjust offset as needed
+}
+
+function showTooltipLink(event, d) {
+    console.log(d);
+    tooltip.transition().duration(200).style("opacity", .9);
+    tooltip.html(`<b>Quantity: ${d.data.quantity}</b>`)
         .style("left", (event.pageX + 10) + "px") // Adjust offset as needed
         .style("top", (event.pageY - 28) + "px"); // Adjust offset as needed
 }
