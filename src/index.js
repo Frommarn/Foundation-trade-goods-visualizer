@@ -7,11 +7,20 @@ import * as d3dag from "https://cdn.skypack.dev/d3-dag@1.0.0-1";
 
 let nodes = [];
 let links = [];
-let yamlData; // Store the original parsed data
+let yamlData = null; // Store the original parsed data
 
 const tooltip = d3.select(".tooltip");
 const width = 800;
 const height = 600;
+
+// global
+let svg = d3
+  .select("#chart")
+  .select("#svg")
+  // pad a little for link thickness
+  .style("width", width + 4)
+  .style("height", height + 4);
+
 
 // Event listener for radio buttons
 // d3.selectAll('input[name="visualization"]').on('change', function () {
@@ -20,7 +29,31 @@ const height = 600;
 //     updateVisualization();
 // });
 
-document.getElementById('csvFileInput').addEventListener('change', handleFileSelect);
+document.getElementById('yamlFileInput').addEventListener('change', handleFileSelect);
+
+let isRectangle = true;
+document.getElementById("isRectangle").addEventListener("change", function () {
+  isRectangle = this.checked; // Update boolean based on checkbox state
+  console.log("isRectangle:", isRectangle); // Log the value (for debugging)
+
+  // Call other functions that depend on this boolean value here:
+  updateVisualization();
+});
+
+let nodeRadius = 30;
+document.getElementById("nodeRadius").addEventListener("change", function () {
+  const newValue = parseInt(this.value); // Parse the input as a float
+  if (newValue >= 20) { // Check if the input is a valid number
+    nodeRadius = newValue;
+    this.value = newValue;
+    // console.log("Global number updated:", nodeRadius);
+
+    updateVisualization();
+  } else {
+    alert("Invalid input. Please enter a number >= 20.");
+    this.value = nodeRadius; // Revert to the previous valid value
+  }
+});
 
 function handleFileSelect(event) {
   const file = event.target.files[0];
@@ -42,7 +75,26 @@ function handleFileSelect(event) {
 }
 
 function updateVisualization() {
+  if (!yamlData) {
+    return
+  }
   // svg.selectAll("*").remove(); // Clear previous visualization
+  svg
+    .select("#nodes")
+    .selectAll("g")
+    .remove();
+  svg
+    .select("#defs")
+    .selectAll("linearGradient")
+    .remove();
+  svg
+    .select("#links")
+    .selectAll("path")
+    .remove();
+  svg
+    .select("#arrows")
+    .selectAll("path")
+    .remove();
   drawD3DAG();
 }
 
@@ -284,12 +336,15 @@ function drawD3DAG() {
   const graph = builder(yamlData.goods)
 
   // set the layout functions
-  const nodeRadius = 20;
-  const nodeSize = [nodeRadius * 2, nodeRadius * 2];
+  const nodeSize = [isRectangle ? nodeRadius * 3 : nodeRadius * 2, nodeRadius * 2];
+
   // this truncates the edges so we can render arrows nicely
-  const shape = d3dag.tweakShape(nodeSize, d3dag.shapeEllipse);
+  const shape = d3dag.tweakShape(nodeSize, isRectangle ? d3dag.shapeRect : d3dag.shapeEllipse);
+  // const orientation = d3dag.tweakFlip("diagonal")
+
   // use this to render our edges
   const line = d3.line().curve(d3.curveMonotoneY);
+
   // here's the layout operator, uncomment some of the settings
   const layout = d3dag
     .sugiyama()
@@ -300,6 +355,9 @@ function drawD3DAG() {
     .nodeSize(nodeSize)
     .gap([nodeRadius, nodeRadius])
     .tweaks([shape]);
+  // .tweaks([shape,orientation]);
+
+  const trans = svg.transition().duration(750);
 
   // actually perform the layout and get the final size
   const { width, height } = layout(graph);
@@ -310,20 +368,43 @@ function drawD3DAG() {
   // --------- //
 
   // colors
+  // const colorMap = new Map([
+  //   ["Base", "rgb(255, 0, 0)"],
+  //   ["Intermediate", "rgb(0, 255, 0)"],
+  //   ["product", "rgb(0, 0, 255)"]]);
   const colorMap = new Map([
-    ["Base", "rgb(255, 0, 0)"],
-    ["Intermediate", "rgb(0, 255, 0)"],
-    ["product", "rgb(0, 0, 255)"]]);
+    ["Base", "green"],
+    ["Intermediate", "orange"],
+    ["Product", "red"]]);
 
-  // global
-  const svg = d3
-    .select("#chart")
-    .select("#svg")
-    // pad a little for link thickness
-    .style("width", width + 4)
-    .style("height", height + 4);
-  const trans = svg.transition().duration(750);
+  console.log(colorMap);
 
+  // node.append("rect")
+  // .attr("width", 60) // Adjust width as needed
+  // .attr("height", 40) // Adjust height as needed
+  // .attr("rx", 5) // Rounded corners (optional)
+  // .attr("ry", 5) // Rounded corners (optional)
+  // .attr("fill", "#FAF9F6") // Parchment beige
+  // .attr("stroke", "#D0C8B6") // Slightly darker border
+  // .attr("stroke-width", 1)
+  // .style("filter", dropshadow); // Subtle shadow
+
+  // node.append("circle")
+  //   .attr("r", 30) // Adjust radius as needed
+  //   .attr("fill", "#FAF9F6") // Parchment beige
+  //   .attr("stroke", "#D0C8B6") // Slightly darker border
+  //   .attr("stroke-width", 1)
+  //   .style("filter", dropshadow); // Subtle shadow
+
+  // node.append("text")
+  //   .attr("text-anchor", "middle")
+  //   .attr("dominant-baseline", "central") // Vertically center text
+  //   .text(d => d.data.name) // Display the name
+  //   .attr("font-size", 12)  // Adjust font size
+  //   .attr("font-family", "YourChosenFont") // Replace with your font
+  //   .attr("fill", "#5C4A2E"); // Dark brown text
+
+  const dropshadow = "drop-shadow(2px 2px 2px rgba(0,0,0,0.2))";
   // nodes
   svg
     .select("#nodes")
@@ -337,18 +418,39 @@ function drawD3DAG() {
         .on("mouseover", showTooltipNode)
         .on("mouseout", hideTooltip)
         .call((enter) => {
-          enter
-            .append("circle")
-            .attr("r", nodeRadius)
-            .attr("fill", (n) => colorMap.get(n.data.type));
+          if (isRectangle) {
+            enter
+              .append("rect")
+              .attr("width", nodeSize[0])
+              .attr("height", nodeSize[1])
+              .attr("x", -(nodeSize[0] / 2))
+              .attr("y", -(nodeSize[1] / 2))
+              // .attr("rx", 5) // Rounded corners (optional)
+              // .attr("ry", 5) // Rounded corners (optional)
+              // .attr("fill", (n) => colorMap.get(n.data.type));
+              .attr("fill", "#f4ddab") // Parchment beige
+              .attr("stroke", "#c1ae87") // Slightly darker border
+              .attr("stroke-width", 1)
+              .style("filter", dropshadow); // Subtle shadow
+          } else {
+            enter
+              .append("circle")
+              .attr("r", nodeRadius)
+              // .attr("fill", (n) => colorMap.get(n.data.type));
+              .attr("fill", "#f4ddab") // Parchment beige
+              .attr("stroke", "#c1ae87") // Slightly darker border
+              .attr("stroke-width", 1)
+              .style("filter", dropshadow); // Subtle shadow
+          }
           enter
             .append("text")
-            .text((d) => d.data.name)
-            .attr("font-weight", "bold")
+            .text((d) => d.data?.displayName ?? d.data.name)
+            .attr("font-weight", "normal")
             .attr("font-family", "sans-serif")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "middle")
-            .attr("fill", "white");
+            .attr("font-size", 12)
+            .attr("fill", "gray");
           enter.transition(trans).attr("opacity", 1);
         })
     );
@@ -362,24 +464,25 @@ function drawD3DAG() {
       enter
         .append("linearGradient")
         .attr("id", ({ source, target }) =>
-          encodeURIComponent(`${source.data.id}--${target.data.id}`)
+          encodeURIComponent(`${source.data.name}--${target.data.name}`)
         )
         .attr("gradientUnits", "userSpaceOnUse")
         .attr("x1", ({ points }) => points[0][0])
         .attr("x2", ({ points }) => points[points.length - 1][0])
         .attr("y1", ({ points }) => points[0][1])
         .attr("y2", ({ points }) => points[points.length - 1][1])
+        .style("filter", dropshadow) // Subtle shadow
         .call((enter) => {
           enter
             .append("stop")
             .attr("class", "grad-start")
             .attr("offset", "0%")
-            .attr("stop-color", ({ source }) => colorMap.get(source.data.type));
+            .attr("stop-color", ({ source }) => { const col = colorMap.get(source.data.type); console.log(source.data.name + " : " + col); return col; });
           enter
             .append("stop")
             .attr("class", "grad-stop")
             .attr("offset", "100%")
-            .attr("stop-color", ({ target }) => colorMap.get(target.data.type));
+            .attr("stop-color", ({ target }) => { const col = colorMap.get(target.data.type); console.log(target.data.name + " : " + col); return col; });
         })
     );
 
@@ -396,11 +499,12 @@ function drawD3DAG() {
         .attr("stroke-width", 3)
         .attr(
           "stroke",
-          ({ source, target }) => `url(#${source.data.id}--${target.data.id})`
+          ({ source, target }) => `url(#${source.data.name}--${target.data.name})`
         )
         .on("mouseover", showTooltipLink)
         .on("mouseout", hideTooltip)
         .attr("opacity", 0)
+        .style("filter", dropshadow) // Subtle shadow
         .call((enter) => enter.transition(trans).attr("opacity", 1))
     );
 

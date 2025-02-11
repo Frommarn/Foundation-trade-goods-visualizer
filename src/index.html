@@ -51,21 +51,22 @@
 
   <h1>Trade Good Dependency Visualization</h1>
 
-  <input type="file" id="csvFileInput" accept=".yaml">
+  <input type="file" id="yamlFileInput" accept=".yaml">
   <!-- <button onclick="exportCSV()">Export CSV</button> -->
-<!-- 
+  <!-- 
   <div>
     <label><input type="radio" name="visualization" value="force" checked> Force Directed</label>
     <label><input type="radio" name="visualization" value="tree"> Tidy Tree</label>
     <label><input type="radio" name="visualization" value="d3dag"> D3 DAG</label>
   </div> -->
-
+  <input type="checkbox" id="isRectangle" checked>Toggle node shape (rectangle vs circle)</input>
+  <input type="number" id="nodeRadius" value="30" min="20" step="5">
   <div id="chart">
     <svg id="svg">
       <g transform="translate(2, 2)">
         <defs id="defs" />
-        <g id="links" />
         <g id="nodes" />
+        <g id="links" />
         <g id="arrows" />
       </g>
     </svg>

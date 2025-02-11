@@ -49,7 +49,8 @@ goods:
     type: Base
     buyPrice: 1
     sellPrice: 1.5
-  - name: "Polished Stone" # Quotes needed for names with spaces
+  - name: Polished_Stone
+    displayName: "Polished Stone" # Quotes needed for names with spaces
     type: Product
     buyPrice: 2
     sellPrice: 3
