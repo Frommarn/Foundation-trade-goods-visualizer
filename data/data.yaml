@@ -1,0 +1,58 @@
+goods:
+  - name: Wheat
+    type: Base
+    buyPrice: 1
+    sellPrice: 2
+  - name: Flour
+    type: Intermediate
+    buyPrice: 3
+    sellPrice: 4
+    ingredients:
+      - name: Wheat
+        quantity: 5
+  - name: Bread
+    type: Product
+    buyPrice: 5
+    sellPrice: 6
+    ingredients:
+      - name: Flour
+        quantity: 3
+      - name: Water
+        quantity: 1
+  - name: Water
+    type: Base
+    buyPrice: 0.5
+    sellPrice: 1
+  - name: Boar
+    type: Base
+    buyPrice: 2
+    sellPrice: 3
+  - name: Meat
+    type: Product
+    buyPrice: 4
+    sellPrice: 5
+    ingredients:
+      - name: Boar
+        quantity: 1
+  - name: Lumber
+    type: Base
+    buyPrice: 1
+    sellPrice: 2
+  - name: Plank
+    type: Product
+    buyPrice: 3
+    sellPrice: 4
+    ingredients:
+      - name: Lumber
+        quantity: 1
+  - name: Stone
+    type: Base
+    buyPrice: 1
+    sellPrice: 1.5
+  - name: "Polished Stone" # Quotes needed for names with spaces
+    type: Product
+    buyPrice: 2
+    sellPrice: 3
+    ingredients:
+      - name: Stone
+        quantity: 3

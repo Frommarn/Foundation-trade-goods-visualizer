@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Trade Good Dependencies</title>
+  <!-- <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/d3-dag@1.1.0"></script> -->
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    #chart {
+      width: 800px;
+      height: 600px;
+      border: 1px solid #ccc;
+    }
+
+    .node circle {
+      stroke: #fff;
+      stroke-width: 1.5px;
+    }
+
+    .link {
+      stroke: #999;
+      stroke-opacity: 0.6;
+    }
+
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      pointer-events: none;
+      /* Prevent tooltip from blocking mouse events */
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .node text {
+      /* Adjust font size as needed */
+      font-size: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Trade Good Dependency Visualization</h1>
+
+  <input type="file" id="csvFileInput" accept=".yaml">
+  <!-- <button onclick="exportCSV()">Export CSV</button> -->
+<!-- 
+  <div>
+    <label><input type="radio" name="visualization" value="force" checked> Force Directed</label>
+    <label><input type="radio" name="visualization" value="tree"> Tidy Tree</label>
+    <label><input type="radio" name="visualization" value="d3dag"> D3 DAG</label>
+  </div> -->
+
+  <div id="chart">
+    <svg id="svg">
+      <g transform="translate(2, 2)">
+        <defs id="defs" />
+        <g id="links" />
+        <g id="nodes" />
+        <g id="arrows" />
+      </g>
+    </svg>
+  </div>
+  <div class="tooltip"></div>
+
+  <script type="module" src="./index.js"></script>
+
+</body>
+
+</html>
