@@ -59,6 +59,12 @@
     <label><input type="radio" name="visualization" value="tree"> Tidy Tree</label>
     <label><input type="radio" name="visualization" value="d3dag"> D3 DAG</label>
   </div> -->
+  <select id="d3dagOrientation">
+    <option value="none">None</option>
+    <option value="diagonal">Diagonal</option>
+    <option value="horizontal">Horizontal</option>
+    <option value="vertical">Vertical</option>
+  </select>
   <input type="checkbox" id="isRectangle" checked>Toggle node shape (rectangle vs circle)</input>
   <input type="number" id="nodeRadius" value="30" min="20" step="5">
   <div id="chart">

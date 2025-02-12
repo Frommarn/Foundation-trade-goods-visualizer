@@ -28,6 +28,14 @@ let svg = d3
 
 document.getElementById('yamlFileInput').addEventListener('change', handleFileSelect);
 
+let d3dagOrientation = "none";
+document.getElementById("d3dagOrientation").addEventListener("change", function () {
+  d3dagOrientation = this.value;
+  console.log("Selected option:", d3dagOrientation);
+
+  updateVisualization();
+});
+
 let isRectangle = true;
 document.getElementById("isRectangle").addEventListener("change", function () {
   isRectangle = this.checked; // Update boolean based on checkbox state
@@ -75,7 +83,7 @@ function updateVisualization() {
   if (!yamlData) {
     return
   }
-  
+
   // Clear previous visualization
   svg
     .select("#nodes")
@@ -93,7 +101,7 @@ function updateVisualization() {
     .select("#arrows")
     .selectAll("path")
     .remove();
-  
+
   drawD3DAG();
 }
 
@@ -334,13 +342,20 @@ function drawD3DAG() {
     });
   const graph = builder(yamlData.goods)
 
-  const tweakFlip = "diagonal";
   // set the layout functions
   const nodeSize = [isRectangle ? nodeRadius * 3 : nodeRadius * 2, nodeRadius * 2];
 
+  const tweakArray = []
+  const tweakFlipValue = d3dagOrientation;
+
   // this truncates the edges so we can render arrows nicely
-  const shape = d3dag.tweakShape(tweakFlip == "diagonal" ? [nodeSize[1],nodeSize[0]] : nodeSize, isRectangle ? d3dag.shapeRect : d3dag.shapeEllipse);
-  const orientation = d3dag.tweakFlip(tweakFlip);
+  const shape = d3dag.tweakShape(tweakFlipValue == "diagonal" ? [nodeSize[1], nodeSize[0]] : nodeSize, isRectangle ? d3dag.shapeRect : d3dag.shapeEllipse);
+  tweakArray.push(shape)
+
+  if (tweakFlipValue == "diagonal") {
+    const orientation = d3dag.tweakFlip(tweakFlipValue);
+    tweakArray.push(orientation)
+  }
 
   // use this to render our edges
   const line = d3.line().curve(d3.curveMonotoneY);
@@ -352,10 +367,10 @@ function drawD3DAG() {
     //.decross(d3dag.decrossOpt())
     //.coord(d3dag.coordGreedy())
     //.coord(d3dag.coordQuad())
-    .nodeSize(tweakFlip == "diagonal" ? [nodeSize[1],nodeSize[0]] : nodeSize)
+    .nodeSize(tweakFlipValue == "diagonal" ? [nodeSize[1], nodeSize[0]] : nodeSize)
     .gap([nodeRadius, nodeRadius])
     // .tweaks([shape]);
-  .tweaks([shape,orientation]);
+    .tweaks(tweakArray);
 
   const trans = svg.transition().duration(750);
 
@@ -364,8 +379,8 @@ function drawD3DAG() {
 
   // set svg size and pad a little for link thickness
   svg
-  .style("width", width + 4)
-  .style("height", height + 4);
+    .style("width", width + 4)
+    .style("height", height + 4);
 
   // --------- //
   // Rendering //
