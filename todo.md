@@ -4,5 +4,8 @@
 - See if I can get the images for all resource icons
   - If so, add the icons to the middle of the nodes
   - Otherwise, make the text smaller?
-- Explore if making the nodes into rectangles is better
+- Explore if making the nodes into rectangles is better **Check**
+- Get all trading data
+- Get all resource dependencies
+- Get all resource production output amounts
 - Explore `const orientation = d3dag.tweakFlip("diagonal")`

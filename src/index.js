@@ -10,16 +10,13 @@ let links = [];
 let yamlData = null; // Store the original parsed data
 
 const tooltip = d3.select(".tooltip");
-const width = 800;
-const height = 600;
+// const width = 800;
+// const height = 600;
 
 // global
 let svg = d3
   .select("#chart")
-  .select("#svg")
-  // pad a little for link thickness
-  .style("width", width + 4)
-  .style("height", height + 4);
+  .select("#svg");
 
 
 // Event listener for radio buttons
@@ -78,7 +75,8 @@ function updateVisualization() {
   if (!yamlData) {
     return
   }
-  // svg.selectAll("*").remove(); // Clear previous visualization
+  
+  // Clear previous visualization
   svg
     .select("#nodes")
     .selectAll("g")
@@ -95,6 +93,7 @@ function updateVisualization() {
     .select("#arrows")
     .selectAll("path")
     .remove();
+  
   drawD3DAG();
 }
 
@@ -335,12 +334,13 @@ function drawD3DAG() {
     });
   const graph = builder(yamlData.goods)
 
+  const tweakFlip = "diagonal";
   // set the layout functions
   const nodeSize = [isRectangle ? nodeRadius * 3 : nodeRadius * 2, nodeRadius * 2];
 
   // this truncates the edges so we can render arrows nicely
-  const shape = d3dag.tweakShape(nodeSize, isRectangle ? d3dag.shapeRect : d3dag.shapeEllipse);
-  // const orientation = d3dag.tweakFlip("diagonal")
+  const shape = d3dag.tweakShape(tweakFlip == "diagonal" ? [nodeSize[1],nodeSize[0]] : nodeSize, isRectangle ? d3dag.shapeRect : d3dag.shapeEllipse);
+  const orientation = d3dag.tweakFlip(tweakFlip);
 
   // use this to render our edges
   const line = d3.line().curve(d3.curveMonotoneY);
@@ -352,16 +352,20 @@ function drawD3DAG() {
     //.decross(d3dag.decrossOpt())
     //.coord(d3dag.coordGreedy())
     //.coord(d3dag.coordQuad())
-    .nodeSize(nodeSize)
+    .nodeSize(tweakFlip == "diagonal" ? [nodeSize[1],nodeSize[0]] : nodeSize)
     .gap([nodeRadius, nodeRadius])
-    .tweaks([shape]);
-  // .tweaks([shape,orientation]);
+    // .tweaks([shape]);
+  .tweaks([shape,orientation]);
 
   const trans = svg.transition().duration(750);
 
   // actually perform the layout and get the final size
   const { width, height } = layout(graph);
 
+  // set svg size and pad a little for link thickness
+  svg
+  .style("width", width + 4)
+  .style("height", height + 4);
 
   // --------- //
   // Rendering //
@@ -425,9 +429,8 @@ function drawD3DAG() {
               .attr("height", nodeSize[1])
               .attr("x", -(nodeSize[0] / 2))
               .attr("y", -(nodeSize[1] / 2))
-              // .attr("rx", 5) // Rounded corners (optional)
-              // .attr("ry", 5) // Rounded corners (optional)
-              // .attr("fill", (n) => colorMap.get(n.data.type));
+              .attr("rx", 5)
+              .attr("ry", 5)
               .attr("fill", "#f4ddab") // Parchment beige
               .attr("stroke", "#c1ae87") // Slightly darker border
               .attr("stroke-width", 1)
@@ -436,7 +439,6 @@ function drawD3DAG() {
             enter
               .append("circle")
               .attr("r", nodeRadius)
-              // .attr("fill", (n) => colorMap.get(n.data.type));
               .attr("fill", "#f4ddab") // Parchment beige
               .attr("stroke", "#c1ae87") // Slightly darker border
               .attr("stroke-width", 1)
@@ -445,11 +447,11 @@ function drawD3DAG() {
           enter
             .append("text")
             .text((d) => d.data?.displayName ?? d.data.name)
-            .attr("font-weight", "normal")
+            .attr("font-weight", "bold")
             .attr("font-family", "sans-serif")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "middle")
-            .attr("font-size", 12)
+            .attr("font-size", 14)
             .attr("fill", "gray");
           enter.transition(trans).attr("opacity", 1);
         })
@@ -477,12 +479,12 @@ function drawD3DAG() {
             .append("stop")
             .attr("class", "grad-start")
             .attr("offset", "0%")
-            .attr("stop-color", ({ source }) => { const col = colorMap.get(source.data.type); console.log(source.data.name + " : " + col); return col; });
+            .attr("stop-color", ({ source }) => colorMap.get(source.data.type));
           enter
             .append("stop")
             .attr("class", "grad-stop")
             .attr("offset", "100%")
-            .attr("stop-color", ({ target }) => { const col = colorMap.get(target.data.type); console.log(target.data.name + " : " + col); return col; });
+            .attr("stop-color", ({ target }) => colorMap.get(target.data.type));
         })
     );
 
@@ -535,16 +537,16 @@ function showTooltipNode(event, d) {
   // console.log(d);
   tooltip.transition().duration(200).style("opacity", .9);
   tooltip.html(`<b>${d.data.name}</b><br>Type: ${d.data.type}<br>Buy Price: ${d.data.buyPrice}<br>Sell Price: ${d.data.sellPrice}`)
-    .style("left", (event.pageX + 10) + "px") // Adjust offset as needed
-    .style("top", (event.pageY - 28) + "px"); // Adjust offset as needed
+    .style("left", (event.pageX + 10) + "px")
+    .style("top", (event.pageY - 28) + "px");
 }
 
 function showTooltipLink(event, d) {
   console.log(d);
   tooltip.transition().duration(200).style("opacity", .9);
   tooltip.html(`<b>Quantity: ${d.data.quantity}</b>`)
-    .style("left", (event.pageX + 10) + "px") // Adjust offset as needed
-    .style("top", (event.pageY - 28) + "px"); // Adjust offset as needed
+    .style("left", (event.pageX + 10) + "px")
+    .style("top", (event.pageY - 28) + "px");
 }
 
 function hideTooltip() {

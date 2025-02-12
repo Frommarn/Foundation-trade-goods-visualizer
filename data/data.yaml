@@ -1,59 +1,414 @@
+trade_routes:
+  - name: Northbury
+    info: "Allied with Labour"
+    buyFrom:
+      - name: Tools
+        price: 6
+      - name: Cloth
+        price: 4
+      - name: Berries
+        price: 2
+      - name: Berry_Brew
+        price: 3
+      - name: Honey
+        price: 10
+      - name: Wax
+        price: 2
+      - name: Candle
+        price: 10
+      - name: Barrel
+        price: 6
+    sellTo:
+      - name: Cheese
+        price: 5
+      - name: Polished_Stone
+        price: 3
+      - name: Planks
+        price: 1
+      - name: Wine
+        price: 5
+      - name: Herbs
+        price: 3
+      - name: Gold_Ore
+        price: 4
+      - name: Gold_Bars
+        price: 7
+      - name: Meat
+        price: 3
+  - name: Myddle
+    info: "Allied with Clergy"
+    buyFrom:
+      - name: Coal
+        price: 2
+      - name: Iron
+        price: 5
+      - name: Wheat
+        price: 3
+      - name: Bread
+        price: 4
+      - name: Grapes
+        price: 4
+      - name: Wine
+        price: 10
+      - name: Hops
+        price: 2
+      - name: Beer
+        price: 5
+    sellTo:
+      - name: Glass
+        price: 3
+      - name: Barrel
+        price: 3
+      - name: Common_Cloth
+        price: 2
+      - name: Tools
+        price: 3
+      - name: Fish
+        price: 1
+      - name: Marble
+        price: 5
+      - name: Jewellery
+        price: 10
+      - name: Berry_Brew
+        price: 1
+  - name: Davenport
+    info: "Allied with Kingdom"
+    buyFrom:
+      - name: Fish
+        price: 2
+      - name: Herbs
+        price: 6
+      - name: Common_Wares
+        price: 8
+      - name: Gold_Ore
+        price: 8
+      - name: Gold_Bars
+        price: 15
+      - name: Quartz
+        price: 2
+      - name: Glass
+        price: 7
+      - name: Marble
+        price: 10
+    sellTo:
+      - name: Boar
+        price: 2
+      - name: Honey
+        price: 5
+      - name: Wax
+        price: 1
+      - name: Candle
+        price: 5
+      - name: Bread
+        price: 2
+      - name: Hops
+        price: 1
+      - name: Beer
+        price: 2
+      - name: Gems
+        price: 7
+
+  - name: Trotbury
+    info: "Allied with Labour"
+    buyFrom:
+      - name: Wood
+        price: 2
+      - name: Stone
+        price: 3
+      - name: Boar
+        price: 4
+      - name: Meat
+        price: 6
+      - name: Iron_Ore
+        price: 3
+      - name: Coal
+        price: 2
+      - name: Gems
+        price: 15
+      - name: Jewellery
+        price: 20
+    sellTo:
+      - name: Common_Cloth
+        price: 2
+      - name: Common_Wares
+        price: 4
+      - name: Glass
+        price: 3
+      - name: Barrel
+        price: 3
+      - name: Polished_Stone
+        price: 3
+      - name: Gold_Bars
+        price: 7
+      - name: Bread
+        price: 2
+      - name: Fish
+        price: 1
+  - name: Kinstone_Abbey
+    displayName: "Kinstone Abbey"
+    info: "Allied with Clergy"
+    buyFrom:
+      - name: Barrel
+        price: 6
+      - name: Common_Cloth
+        price: 5
+      - name: Stone
+        price: 3
+      - name: Polished_Stone
+        price: 6
+      - name: Meat
+        price: 6
+      - name: Gems
+        price: 15
+      - name: Iron
+        price: 5
+      - name: Cheese
+        price: 8
+    sellTo:
+      - name: Herbs
+        price: 3
+      - name: Honey
+        price: 5
+      - name: Wax
+        price: 1
+      - name: Grapes
+        price: 2
+      - name: Common_Wares
+        price: 5
+      - name: Berries
+        price: 1
+      - name: ?????
+        price: 1
+      - name: Hops
+        price: 1
+  - name: Castle_Harbour
+    displayName: "Castle Harbour"
+    info: "Allied with Kingdom"
+    buyFrom:
+      - name: Steel??
+        price: 16
+      - name: Jewellery
+        price: 20
+      - name: Herbs
+        price: 6
+      - name: Tools
+        price: 6
+      - name: Polished_Stone
+        price: 6
+      - name: Cloth
+        price: 4
+      - name: Iron
+        price: 5
+      - name: Fish
+        price: 2
+    sellTo:
+      - name: Coal
+        price: 1
+      - name: Sword??
+        price: 5
+      - name: Bow??
+        price: 5
+      - name: Spear??
+        price: 5
+      - name: Marble
+        price: 5
+      - name: Quartz
+        price: 1
+      - name: Gold_Ore
+        price: 4
+      - name: Planks
+        price: 1
+
+## Each good can have the following attributes
+#  - name: String - Required
+#    displayName: "Quoted string" - Optional
+#    type: String - Required
+#    productionRate: 
+#    ingredients: Array of objects - Optional
+#      - name: String - Required (if ingredients array is specified)
+#        quantity: String - Required (if ingredients array is specified)
+
 goods:
+  - name: Water
+    type: Base
+    productionRate: 0
+  - name: Vegetables
+    type: Base
+    productionRate: -1
+  - name: Berries
+    type: Base
+    productionRate: 1
+  - name: Boar
+    type: Base
+    productionRate: 1
+  - name: Meat
+    type: Product
+    productionRate: 5
+    ingredients:
+      - name: Boar
+        quantity: 1
+  - name: Fish
+    type: Base
+    productionRate: 6
   - name: Wheat
     type: Base
-    buyPrice: 1
-    sellPrice: 2
+    productionRate: -1
   - name: Flour
     type: Intermediate
-    buyPrice: 3
-    sellPrice: 4
+    productionRate: -1
     ingredients:
       - name: Wheat
-        quantity: 5
+        quantity: 4
   - name: Bread
     type: Product
-    buyPrice: 5
-    sellPrice: 6
+    productionRate: 5
     ingredients:
       - name: Flour
         quantity: 3
       - name: Water
         quantity: 1
-  - name: Water
+  - name: Cheese
+    type: ??
+    productionRate: ??
+  - name: Wool
     type: Base
-    buyPrice: 0.5
-    sellPrice: 1
-  - name: Boar
-    type: Base
-    buyPrice: 2
-    sellPrice: 3
-  - name: Meat
-    type: Product
-    buyPrice: 4
-    sellPrice: 5
+    productionRate: 3
+  - name: Cloth
+    type: Intermediate
+    productionRate: 1
     ingredients:
-      - name: Boar
+      - name: Wool
+        quantity: 3
+  - name: Common_Cloth
+    displayName: "Common Cloth"
+    type: Product
+    productionRate: 2
+    ingredients:
+      - name: Cloth
         quantity: 1
-  - name: Lumber
-    type: Base
-    buyPrice: 1
-    sellPrice: 2
-  - name: Plank
+  - name: Common_Wares
+    displayName: "Common Wares"
+    type: ??
+    productionRate: ??
+  - name: Wax
+    type: ??
+    productionRate: ??
+  - name: Candle
+    type: ??
+    productionRate: ??
+  - name: Berry_Brew
+    displayName: "Berry Brew"
     type: Product
-    buyPrice: 3
-    sellPrice: 4
+    productionRate: ??
     ingredients:
-      - name: Lumber
+      - name: Berries
+        quantity: ??
+  - name: Herbs
+    type: ??
+    productionRate: ??
+  - name: Honey
+    type: ??
+    productionRate: ??
+  - name: Wine
+    type: ??
+    productionRate: ??
+  - name: Jewellery
+    type: 
+    productionRate: 
+  - name: Simple_Stew
+    displayName: "Simple Stew"
+    type: 
+    productionRate: 
+  - name: Garnished_Greens
+    displayName: "Garnished Greens"
+    type: 
+    productionRate: 
+  - name: Golden_Gruel
+    displayName: "Golden Gruel"
+    type: 
+    productionRate: 
+  - name: Robust_Roast
+    displayName: "Robust Roast"
+    type: 
+    productionRate: 
+  - name: Wood
+    type: Base
+    productionRate:
+  - name: Planks
+    type: Product
+    productionRate:
+    ingredients:
+      - name: Wood
         quantity: 1
   - name: Stone
     type: Base
-    buyPrice: 1
-    sellPrice: 1.5
+    productionRate: 
   - name: Polished_Stone
-    displayName: "Polished Stone" # Quotes needed for names with spaces
+    displayName: "Polished Stone"
     type: Product
-    buyPrice: 2
-    sellPrice: 3
+    productionRate:
     ingredients:
       - name: Stone
         quantity: 3
+  - name: Coal
+    type: Base
+    productionRate: 
+  - name: Iron_Ore
+    displayName: "Iron Ore"
+    type: Base
+    productionRate: 
+  - name: Iron
+    type: Intermediate
+    productionRate: 
+    ingredients:
+      - name: Coal
+        quantity:
+      - name: Iron_Ore
+        quantity:
+  - name: Tools
+    type: 
+    productionRate: 
+    ingredients:
+      - name: Iron
+        quantity:
+      - name: Coal
+        quantity:
+  - name: Quartz
+    type: Base
+    productionRate: 
+  - name: Glass
+    type: 
+    productionRate: 
+    ingredients:
+      - name: Quartz
+        quantity:
+      - name: Coal
+        quantity:
+  - name: Marble
+    type: Base
+    productionRate: 
+  - name: Gold_Ore
+    displayName: "Gold Ore"
+    type: Base
+    productionRate: 
+  - name: Gold_Bars
+    displayName: "Gold Bars"
+    type: Intermediate
+    productionRate: 
+    ingredients:
+      - name: Gold_Ore
+        quantity:
+      - name: Coal
+        quantity:
+  - name: Gems
+    type: Base
+    productionRate: 
+  - name: Barrel
+    type: 
+    productionRate: 
+    ingredients:
+      - name: Planks
+        quantity:
+  - name: Manuscript
+    type: 
+    productionRate: 
